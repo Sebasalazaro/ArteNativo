@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+<!--  -->
+{% block title %}{{ title }}{% endblock %}
+<!--  -->
+{% block content %}
+<h2>Lista de Productos</h2>
+<a href="{% url 'product_create' %}">Agregar nuevo producto</a>
+<ul>
+  {% for product in products %}
+  <li>
+    <h3>{{ product.name }}</h3>
+    <p>{{ product.description }}</p>
+    <p>Precio: ${{ product.price }}</p>
+    <a href="{% url 'product_update' product.pk %}">Editar</a>
+    <a href="{% url 'product_delete' product.pk %}">Eliminar</a>
+    <a href="{% url 'auction_create' product.pk %}">Iniciar subasta</a>
+    <a href="{% url 'new_cart_item' product.pk %}">Agregar al carrito</a>
+
+    <button
+      class="btn btn-primary"
+      type="button"
+      data-toggle="collapse"
+      data-target="#comments-{{ product.id }}"
+      aria-expanded="false"
+      aria-controls="comments-{{ product.id }}"
+    >
+      Mostrar Comentarios
+    </button>
+
+    <div class="collapse" id="comments-{{ product.id }}">
+      <ul>
+        {% for comment in product.comments.all %}
+        <li>
+          <p>
+            <strong>{{ comment.user.username }}:</strong> {{ comment.content }}
+          </p>
+          <p>
+            {% for i in "12345"|slice:":comment.rating" %}
+            <span class="fa fa-star checked"></span>
+            <!-- Estrella llena -->
+            {% endfor %} {% for i in "12345"|slice:":5-comment.rating" %}
+            <span class="fa fa-star"></span>
+            <!-- Estrella vacía -->
+            {% endfor %}
+          </p>
+          <p><small>{{ comment.created_at }}</small></p>
+        </li>
+        {% empty %}
+        <li>No hay comentarios</li>
+        {% endfor %}
+      </ul>
+
+      <!-- Formulario para agregar comentarios -->
+      {% if user.is_authenticated %}
+      <form method="POST">
+        {% csrf_token %} {{ comment_form.as_p }}
+        <input type="hidden" name="product_id" value="{{ product.id }}" />
+        <button type="submit" class="btn btn-primary">
+          Agregar comentario
+        </button>
+      </form>
+      {% else %}
+      <p>Inicia sesión para dejar un comentario</p>
+      {% endif %}
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endblock %}
