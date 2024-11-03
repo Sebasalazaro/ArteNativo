@@ -1,6 +1,7 @@
 from django.urls import reverse
 from django.views import View
 from django.views.generic import ListView
+from django.http import JsonResponse
 from django.http.request import HttpRequest
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -17,6 +18,24 @@ class ProductListView(ListView):
             "products": Product.objects.all()
         }
         return render(request, self.template_name, data)
+    
+class ProductJsonView(View):
+    def get(self, request: HttpRequest):
+        products = Product.objects.all()
+
+        product_list = [
+            {
+                'id': product.id,
+                'name': product.name,
+                'description': product.description,
+                'price': product.price,
+                'image_url': product.image.url if product.image else None
+            }
+            for product in products
+        ]
+        data = { 'products': product_list }
+        return JsonResponse(data)
+
     
 class ProductCreateView(View):
     template_name = 'products/form_.html'
@@ -90,3 +109,18 @@ class ProductDeleteView(View):
         product = get_object_or_404(Product, pk=pk)
         product.delete()    
         return redirect('product_list')
+    
+class ProductSearchView(View):
+    template_name = 'products/results.html'
+
+    def get(self, request: HttpRequest):
+        query = request.GET.get('q')
+        if query:
+            products = Product.objects.filter(name__icontains=query)
+        else:
+            products = []
+        data = {
+            'products': products,
+            'query': query
+        }
+        return render(request, self.template_name, data)

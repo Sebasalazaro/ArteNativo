@@ -3,67 +3,97 @@
 {% block title %}{{ title }}{% endblock %}
 <!--  -->
 {% block content %}
-<h2>Lista de Productos</h2>
-<a href="{% url 'product_create' %}">Agregar nuevo producto</a>
-<ul>
-  {% for product in products %}
-  <li>
-    <h3>{{ product.name }}</h3>
-    <p>{{ product.description }}</p>
-    <p>Precio: ${{ product.price }}</p>
-    <a href="{% url 'product_update' product.pk %}">Editar</a>
-    <a href="{% url 'product_delete' product.pk %}">Eliminar</a>
-    <a href="{% url 'auction_create' product.pk %}">Iniciar subasta</a>
-    <a href="{% url 'new_cart_item' product.pk %}">Agregar al carrito</a>
+<!-- Título de la sección centrado -->
+<h2 class="text-center">Lista de Productos</h2>
 
-    <button
-      class="btn btn-primary"
-      type="button"
-      data-toggle="collapse"
-      data-target="#comments-{{ product.id }}"
-      aria-expanded="false"
-      aria-controls="comments-{{ product.id }}"
-    >
-      Mostrar Comentarios
-    </button>
+<!-- Enlace para agregar un nuevo producto centrado -->
+<div class="text-center mb-3">
+  <a href="{% url 'product_create' %}" class="btn btn-success"
+    >Agregar nuevo producto</a
+  >
+</div>
 
-    <div class="collapse" id="comments-{{ product.id }}">
-      <ul>
-        {% for comment in product.comments.all %}
-        <li>
-          <p>
-            <strong>{{ comment.user.username }}:</strong> {{ comment.content }}
-          </p>
-          <p>
-            {% for i in "12345"|slice:":comment.rating" %}
-            <span class="fa fa-star checked"></span>
-            <!-- Estrella llena -->
-            {% endfor %} {% for i in "12345"|slice:":5-comment.rating" %}
-            <span class="fa fa-star"></span>
-            <!-- Estrella vacía -->
-            {% endfor %}
-          </p>
-          <p><small>{{ comment.created_at }}</small></p>
-        </li>
-        {% empty %}
-        <li>No hay comentarios</li>
-        {% endfor %}
-      </ul>
+<!-- Formulario de búsqueda -->
+<div class="text-center mb-4">
+  <form method="GET" action="{% url 'search' %}">
+    <input type="text" name="q" placeholder="Buscar productos..." required />
+    <button type="submit" class="btn btn-primary">Buscar</button>
+  </form>
+</div>
 
-      <!-- Formulario para agregar comentarios -->
-      {% if user.is_authenticated %}
-      <form method="POST">
-        {% csrf_token %} {{ comment_form.as_p }}
-        <input type="hidden" name="product_id" value="{{ product.id }}" />
-        <button type="submit" class="btn btn-primary">
-          Agregar comentario
-        </button>
-      </form>
-      {% else %}
-      <p>Inicia sesión para dejar un comentario</p>
-      {% endif %}
+<!-- Contenedor donde se cargarán los productos dinámicamente -->
+<ul id="product-list" class="list-group"></ul>
+
+<template id="product-item-template">
+  <li class="list-group-item mb-4">
+    <div class="d-flex">
+      <img
+        src=""
+        alt=""
+        class="img-thumbnail mr-3"
+        style="width: 200px; height: 200px; object-fit: cover"
+      />
+      <div class="ml-3">
+        <h3 class="product-name"></h3>
+        <p class="product-description"></p>
+        <p class="product-price"></p>
+        <div class="d-flex flex-wrap mb-3">
+          <a href="#" class="btn btn-warning btn-sm btn-spacing product-edit"
+            >Editar</a
+          >
+          <a href="#" class="btn btn-danger btn-sm btn-spacing product-delete"
+            >Eliminar</a
+          >
+          <a href="#" class="btn btn-info btn-sm btn-spacing product-auction"
+            >Iniciar subasta</a
+          >
+          <a
+            href="#"
+            class="btn btn-primary btn-sm btn-spacing product-add-cart"
+            >Agregar al carrito</a
+          >
+        </div>
+      </div>
     </div>
   </li>
-  {% endfor %}
-</ul>
+</template>
+
+<script>
+  async function loadProducts() {
+    const response = await fetch("{% url 'product_list_json' %}");
+    const data = await response.json();
+
+    const productList = document.getElementById("product-list");
+    const template = document.getElementById("product-item-template").content;
+
+    productList.innerHTML = "";
+    data.products.forEach((product) => {
+      const productItem = document.importNode(template, true);
+
+      productItem.querySelector("img").src = product.image_url;
+      productItem.querySelector("img").alt = product.name;
+      productItem.querySelector(".product-name").textContent = product.name;
+      productItem.querySelector(".product-description").textContent =
+        product.description;
+      productItem.querySelector(
+        ".product-price"
+      ).textContent = `Precio: $${product.price}`;
+
+      productItem.querySelector(".product-edit").href =
+        `{% url 'product_update' 0 %}`.replace("0", product.id);
+      productItem.querySelector(".product-delete").href =
+        `{% url 'product_delete' 0 %}`.replace("0", product.id);
+      productItem.querySelector(".product-auction").href =
+        `{% url 'auction_create' 0 %}`.replace("0", product.id);
+      productItem.querySelector(".product-add-cart").href =
+        `{% url 'new_cart_item' 0 %}`.replace("0", product.id);
+
+      // Add the product to the list
+      productList.appendChild(productItem);
+    });
+  }
+
+  loadProducts().catch((e) => console.error("Error:", error));
+</script>
+
 {% endblock %}

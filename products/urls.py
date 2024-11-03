@@ -7,4 +7,6 @@ urlpatterns = [
     path('view/<int:pk>/', ProductReadView.as_view(), name='product_read'),
     path('update/<int:pk>/', ProductUpdateView.as_view(), name='product_update'),
     path('delete/<int:pk>/', ProductDeleteView.as_view(), name='product_delete'),
+    path('json/', ProductJsonView.as_view(), name='product_list_json'),
+    path('search/', ProductSearchView.as_view(), name='search')
 ]
