@@ -4,6 +4,8 @@ from django.views.generic import ListView
 from django.http import JsonResponse
 from django.http.request import HttpRequest
 from django.shortcuts import render, redirect, get_object_or_404
+from rest_framework import generics
+from .serializer import ProductSerializer
 
 from .models import Product
 from .forms import ProductForm
@@ -124,3 +126,13 @@ class ProductSearchView(View):
             'query': query
         }
         return render(request, self.template_name, data)
+    
+
+
+class ProductListAPIView(generics.ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+class ProductDetailAPIView(generics.RetrieveAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
