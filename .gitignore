@@ -20,9 +20,9 @@ local_settings.py
 /media/
 *.media
 *.png
-*.jpg
 *.jpeg
 *.gif
+**/images/*.jpg
 
 # Static files
 /staticfiles/
