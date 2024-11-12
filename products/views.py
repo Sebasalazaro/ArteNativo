@@ -5,19 +5,24 @@ from django.http import JsonResponse
 from django.http.request import HttpRequest
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import generics
-from .serializer import ProductSerializer
+import requests
 
+from .serializer import ProductSerializer
 from .models import Product
 from .forms import ProductForm
+
+GOOGLE_MAPS_API_KEY = 'AIzaSyC7V_wGnvGMb8DYN-xTjmSgGCAxM5DwDGU'  # Sustituye con tu clave de API
 
 # Create your views here.
 class ProductListView(ListView):
     template_name = 'products/index.html'
 
     def get(self, request: HttpRequest):
+        products = Product.objects.all()
+
         data = {
             "title": "Products",
-            "products": Product.objects.all()
+            "products": products
         }
         return render(request, self.template_name, data)
     
@@ -31,14 +36,14 @@ class ProductJsonView(View):
                 'name': product.name,
                 'description': product.description,
                 'price': product.price,
-                'image_url': product.image.url if product.image else None
+                'image_url': product.image.url if product.image else None,
+                'address': product.address if product.address else None,
             }
             for product in products
         ]
         data = { 'products': product_list }
         return JsonResponse(data)
 
-    
 class ProductCreateView(View):
     template_name = 'products/form_.html'
     
@@ -53,14 +58,15 @@ class ProductCreateView(View):
     def post(self, request: HttpRequest):
         form = ProductForm(request.POST)
         if form.is_valid():
-            form.save()
+            product = form.save(commit=False)
+            product.save()
             return redirect('product_list')
         data = { 
             'title': 'New Product', 
             'form': form, 
         }
         return render(request, self.template_name, data)
-    
+     
 class ProductReadView(View):
     template_name = 'products/view.html'
 

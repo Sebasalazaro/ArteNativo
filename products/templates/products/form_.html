@@ -1,69 +1,65 @@
+<!-- products/templates/products/form_.html -->
 {% extends 'base.html' %}
-<!--  -->
 {% block title %}{{ title }}{% endblock %}
-<!--  -->
 {% block content %}
 <div class="container mt-5 d-flex justify-content-center">
   <div class="col-md-6">
     <h2 class="text-center mb-4">
       {% if form.instance.pk %}
-      <span> Editar Producto </span>
+      <span>Editar Producto</span>
       {% else %}
-      <span> Agregar Producto </span>
+      <span>Agregar Producto</span>
       {% endif %}
     </h2>
-    <style>
-      .input-table-full-w tr > td:last-child > * {
-        width: 100%;
-      }
-    </style>
     <form method="post" class="border p-4 rounded bg-light shadow">
       {% csrf_token %}
-
       <table class="table input-table-full-w">
         <tbody>
           <tr>
-            <td>
-              <label for="{{ form.name.id_for_label }}" class="form-label">
-                Nombre
-              </label>
-            </td>
+            <td><label for="{{ form.name.id_for_label }}" class="form-label">Nombre</label></td>
             <td>{{ form.name }}</td>
           </tr>
           <tr>
-            <td>
-              <label
-                for="{{ form.description.id_for_label }}"
-                class="form-label"
-              >
-                Descripción
-              </label>
-            </td>
+            <td><label for="{{ form.description.id_for_label }}" class="form-label">Descripción</label></td>
             <td>{{ form.description }}</td>
           </tr>
           <tr>
-            <td>
-              <label for="{{ form.price.id_for_label }}" class="form-label">
-                Precio
-              </label>
-            </td>
+            <td><label for="{{ form.price.id_for_label }}" class="form-label">Precio</label></td>
             <td>{{ form.price }}</td>
           </tr>
           <tr>
-            <td>
-              <label for="{{ form.image.id_for_label }}" class="form-label">
-                Foto
-              </label>
-            </td>
+            <td><label for="{{ form.image.id_for_label }}" class="form-label">Foto</label></td>
             <td>{{ form.image }}</td>
+          </tr>
+          <tr>
+            <td><label for="{{ form.address.id_for_label }}" class="form-label">Dirección</label></td>
+            <td><input type="text" id="address" name="address" class="form-control" placeholder="Introduce tu dirección" required></td>
           </tr>
         </tbody>
       </table>
-
       <div class="text-center mt-3">
         <button type="submit" class="btn btn-primary">Guardar</button>
       </div>
     </form>
   </div>
 </div>
+
+<!-- Google Maps Autocomplete API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC7V_wGnvGMb8DYN-xTjmSgGCAxM5DwDGU&libraries=places&callback=initAutocomplete" async defer></script>
+
+<script>
+  function initAutocomplete() {
+    const input = document.getElementById('address');
+    const autocomplete = new google.maps.places.Autocomplete(input);
+    autocomplete.setFields(['place_id', 'geometry', 'name', 'formatted_address']);
+    
+    autocomplete.addListener('place_changed', function () {
+      const place = autocomplete.getPlace();
+      if (place.geometry) {
+        // Aquí puedes procesar el lat y long si los necesitas para algo más, pero no es necesario en este punto.
+      }
+    });
+  }
+</script>
+
 {% endblock %}

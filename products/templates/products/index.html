@@ -37,6 +37,7 @@
         <h3 class="product-name"></h3>
         <p class="product-description"></p>
         <p class="product-price"></p>
+        <p class="product-address"></p>
         <div class="d-flex flex-wrap mb-3">
           <a href="#" class="btn btn-warning btn-sm btn-spacing product-edit"
             >Editar</a
@@ -73,11 +74,9 @@
       productItem.querySelector("img").src = product.image_url;
       productItem.querySelector("img").alt = product.name;
       productItem.querySelector(".product-name").textContent = product.name;
-      productItem.querySelector(".product-description").textContent =
-        product.description;
-      productItem.querySelector(
-        ".product-price"
-      ).textContent = `Precio: $${product.price}`;
+      productItem.querySelector(".product-description").textContent = product.description;
+      productItem.querySelector(".product-price").textContent = `Precio: $${product.price}`;
+      productItem.querySelector(".product-address").textContent = `Dirección: ${product.address}`;
 
       productItem.querySelector(".product-edit").href =
         `{% url 'product_update' 0 %}`.replace("0", product.id);
