@@ -9,6 +9,7 @@ done
 
 # Run migrations
 echo "Running migrations..."
+python manage.py makemigrations --noinput
 python manage.py migrate --noinput
 
 # Start the Django development server
